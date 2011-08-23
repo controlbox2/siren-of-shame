@@ -32,7 +32,7 @@ namespace SirenOfShame.Lib.Device.SdCardFileSystem
                 {
                     stream.WriteToStream(result);
                 }
-                Write32BytePadding(result);
+                WriteAudioPatternPadding(result);
             }
         }
 
@@ -40,16 +40,10 @@ namespace SirenOfShame.Lib.Device.SdCardFileSystem
         {
             foreach (var uploadLedPattern in ledPatterns)
             {
-                result.Write(uploadLedPattern.Pattern, 0, uploadLedPattern.Pattern.Length);
+                var pattern = uploadLedPattern.Pattern;
+                result.Write(pattern, 0, pattern.Length);
                 Write32BytePadding(result);
             }
-        }
-
-        private void Write32BytePadding(Stream result)
-        {
-            long paddingLength = 32 - result.Position % 32;
-            byte[] padding = new byte[paddingLength];
-            result.Write(padding, 0, padding.Length);
         }
 
         private void WriteAllocationTable(Stream result, IEnumerable<UploadAudioPattern> audioPatterns, IEnumerable<UploadLedPattern> ledPatterns)
@@ -84,7 +78,7 @@ namespace SirenOfShame.Lib.Device.SdCardFileSystem
             // audio pattern
             foreach (var audioPattern in audioPatterns)
             {
-                ushort patternLength = (ushort)(audioPattern.DataLength);
+                ushort patternLength = GetAdjustedAudioPatternLength(audioPattern.DataLength);
                 UsbAudioFatPacket usbAudioFatPacket = new UsbAudioFatPacket
                 {
                     Name = Encoding.ASCII.GetBytes(audioPattern.Name.PadRight(16, '\0')),
@@ -100,6 +94,32 @@ namespace SirenOfShame.Lib.Device.SdCardFileSystem
             }
 
             Write32BytePadding(result);
+        }
+
+        private ushort GetAdjustedAudioPatternLength(int dataLength)
+        {
+            return (ushort)(dataLength + (SirenOfShameDevice.AudioPatternBufferSize - dataLength % SirenOfShameDevice.AudioPatternBufferSize));
+        }
+
+        private void WriteAudioPatternPadding(Stream result)
+        {
+            // pad the pattern with silence to fill out buffer
+            long paddingLength = SirenOfShameDevice.AudioPatternBufferSize - result.Position % SirenOfShameDevice.AudioPatternBufferSize;
+            byte[] padding = new byte[paddingLength];
+            for (int i = 0; i < padding.Length; i++)
+            {
+                padding[i] = 0xff / 2;
+            }
+            result.Write(padding, 0, padding.Length);
+
+            Write32BytePadding(result);
+        }
+
+        private void Write32BytePadding(Stream result)
+        {
+            long paddingLength = 32 - result.Position % 32;
+            byte[] padding = new byte[paddingLength];
+            result.Write(padding, 0, padding.Length);
         }
 
         public void WriteHeader(Stream result, int audioPatternCount, int ledPatternCount)
