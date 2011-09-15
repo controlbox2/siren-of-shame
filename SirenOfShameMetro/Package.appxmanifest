@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="27943a5a-cd45-44e2-bd89-c9106c243a60" Publisher="CN=joe" Version="1.0.0.0" />
+  <Properties>
+    <DisplayName>SirenOfShameMetro</DisplayName>
+    <PublisherDisplayName>joe</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+    <Description>SirenOfShameMetro</Description>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2</OSMinVersion>
+    <OSMaxVersionTested>6.2</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="sirenofshamemetro.exe" EntryPoint="SirenOfShameMetro.App">
+      <VisualElements DisplayName="SirenOfShameMetro" Logo="Images\Logo.png" SmallLogo="Images\SmallLogo.png" Description="SirenOfShameMetro" ForegroundText="light" BackgroundColor="#222222" InitialRotationPreference="portrait">
+        <SplashScreen Image="Images\SplashScreen.png" />
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="videosLibrary" />
+    <Capability Name="sharedUserCertificates" />
+    <Capability Name="removableStorage" />
+    <Capability Name="picturesLibrary" />
+    <Capability Name="musicLibrary" />
+    <Capability Name="internetClientServer" />
+    <Capability Name="privateNetworkClientServer" />
+    <Capability Name="documentsLibrary" />
+    <Capability Name="defaultWindowsCredentials" />
+    <Capability Name="internetClient" />
+    <DeviceCapability Name="location" />
+    <DeviceCapability Name="microphone" />
+    <DeviceCapability Name="proximity" />
+    <DeviceCapability Name="sms" />
+    <DeviceCapability Name="webcam" />
+  </Capabilities>
+</Package>
