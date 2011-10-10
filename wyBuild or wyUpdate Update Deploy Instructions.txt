@@ -1,0 +1,24 @@
+Build
+
+wyUpdate Deploy Instructions
+	Run wyBuild
+		Update Information
+		+
+		Explorer New Folder in dev directory: Releases\BuildArtifacts\[version]
+		Move MINIMUM SirenOfShame.Lib & SirenOfShame.exe
+		Drag files into "Files & Folders" -> "\Your program's folder"
+		Delete everything in \Releases\Updates\*
+		"Build wyUpdate & Updates" -> Click both buttons
+		Copy \Releases\Updates\* to [update locations]
+			S:\Applications\Siren of Shame Updates
+			ftp://blueink.biz/Sos/Updates
+
+Build msi
+
+Commit
+Tag
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+AssemblyInfo.cs: AssemblyVersion++
+Commit
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
