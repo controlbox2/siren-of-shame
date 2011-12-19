@@ -60,6 +60,27 @@ namespace SirenOfShame.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap ball_gray_big {
+            get {
+                object obj = ResourceManager.GetObject("ball_gray_big", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap ball_green_big {
+            get {
+                object obj = ResourceManager.GetObject("ball_green_big", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap ball_red_big {
+            get {
+                object obj = ResourceManager.GetObject("ball_red_big", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap JoesFavorite3 {
             get {
                 object obj = ResourceManager.GetObject("JoesFavorite3", resourceCulture);
