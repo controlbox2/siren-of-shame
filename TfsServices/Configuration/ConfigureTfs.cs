@@ -90,10 +90,36 @@ namespace TfsServices.Configuration
 
         private void BuildConfigurationsAfterCheck(object sender, TreeViewEventArgs e)
         {
-            if (e.Node.Tag == null) return;
+            bool isParent = e.Node.Tag == null;
+            if (isParent)
+            {
+                bool areAnyUnchecked = AreAnyUnchecked(e.Node);
+                SetChecked(!areAnyUnchecked, e.Node);
+                return;
+            };
             var buildDefinitionId = (string)e.Node.Tag;
             _ciEntryPointSetting.GetBuildDefinition(buildDefinitionId).Active = e.Node.Checked;
             Settings.Save();
+        }
+
+        private void SetChecked(bool check, TreeNode parent)
+        {
+            parent.Checked = check;
+            foreach (TreeNode child in parent.Nodes)
+            {
+                SetChecked(check, child);
+            }
+        }
+
+        private bool AreAnyUnchecked(TreeNode parent)
+        {
+            foreach (TreeNode child in parent.Nodes)
+            {
+                if (!child.Checked) return false;
+                bool anyChildrenUnchecked = AreAnyUnchecked(child);
+                if (anyChildrenUnchecked) return false;
+            }
+            return true;
         }
 
         private void UrlTextChanged(object sender, EventArgs e)
