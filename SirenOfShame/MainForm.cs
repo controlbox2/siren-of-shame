@@ -36,6 +36,9 @@ namespace SirenOfShame
             IocContainer.Instance.Compose(this);
             InitializeComponent();
 
+            fastAnimation.Interval = 1;
+            fastAnimation.Tick += FastAnimationTick;
+
             SirenOfShameDevice.Connected += SirenofShameDeviceConnected;
             SirenOfShameDevice.Disconnected += SirenofShameDeviceDisconnected;
             if (SirenOfShameDevice.IsConnected)
@@ -165,6 +168,7 @@ namespace SirenOfShame
             Invoke(() =>
             {
                 _testSiren.Enabled = enable;
+                _mute.Enabled = enable;
                 if (enable)
                 {
                     _configureSiren.Enabled = SirenOfShameDevice.HardwareType == HardwareType.Pro;
@@ -183,6 +187,7 @@ namespace SirenOfShame
 
         private void Form1Load(object sender, EventArgs e)
         {
+            _panelAlertHeight = _panelAlert.Height;
             Log.Debug("Form1 loaded");
             if (_settings == null)
             {
@@ -190,6 +195,7 @@ namespace SirenOfShame
             }
             StartWatchingBuild();
             RefreshStats();
+            SetMuteButton();
             InitializeBuildHistoryChart();
         }
 
@@ -253,7 +259,24 @@ namespace SirenOfShame
             rulesEngine.SetLights += RulesEngineSetLights;
             rulesEngine.SetTrayIcon += RulesEngineSetTrayIcon;
             rulesEngine.StatsChanged += RulesEngineStatsChanged;
+            rulesEngine.NewAlert += RulesEngineNewAlert;
             return rulesEngine;
+        }
+
+        private bool _showAlert;
+        private DateTime _alertDate;
+        
+        private void RulesEngineNewAlert(object sender, NewAlertArgs args)
+        {
+            Invoke(() =>
+            {
+                _showAlert = true;
+                _panelAlert.Visible = true;
+                _panelAlert.Height = 1;
+                _labelAlert.Text = args.Message;
+                fastAnimation.Start();
+                _alertDate = args.AlertDate;
+            });
         }
 
         private void RulesEngineSetTrayIcon(object sender, SetTrayIconEventArgs args)
@@ -903,6 +926,56 @@ namespace SirenOfShame
         {
             _showAllPeople = _showAllUsers.Checked;
             RefreshUserStats();
+        }
+
+        private void _mute_Click(object sender, EventArgs e)
+        {
+            _settings.Mute = !_settings.Mute;
+            _settings.Save();
+            SetMuteButton();
+        }
+
+        private void SetMuteButton()
+        {
+            _mute.ImageIndex = _settings.Mute ? 5 : 6;
+            _mute.Text = _settings.Mute ? "Unmute" : "Mute";
+        }
+
+        Timer fastAnimation = new Timer();
+        
+        private void _closeAlert_Click(object sender, EventArgs e)
+        {
+            _showAlert = false;
+            fastAnimation.Start();
+            _settings.AlertClosed = _alertDate;
+            _settings.Save();
+        }
+
+        int _panelAlertHeight;
+
+        private void FastAnimationTick(object sender, EventArgs e)
+        {
+            bool hideAlert = !_showAlert;
+            if (hideAlert && _panelAlert.Height > 0)
+            {
+                _panelAlert.Height -= 2;
+            } 
+            else
+            {
+                if (_showAlert && _panelAlert.Height < _panelAlertHeight)
+                {
+                    _panelAlert.Height += 1;
+                }
+                else
+                {
+                    _panelAlert.Visible = _showAlert;
+                    if (_showAlert)
+                    {
+                        _panelAlert.Height = _panelAlertHeight;
+                    }
+                    fastAnimation.Stop();
+                }
+            }
         }
     }
 }
