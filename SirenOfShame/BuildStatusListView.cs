@@ -46,6 +46,7 @@ namespace SirenOfShame
         private void UpdateListItem(ListViewItem listViewItem, BuildStatusListViewItem buildStatus)
         {
             listViewItem.ImageIndex = buildStatus.ImageIndex;
+            UpdateSubItem(listViewItem, "ID", buildStatus.BuildId);
             UpdateSubItem(listViewItem, "StartTime", buildStatus.StartTime, buildStatus.StartTimeTicks);
             UpdateSubItem(listViewItem, "Duration", buildStatus.Duration);
             UpdateSubItem(listViewItem, "RequestedBy", buildStatus.RequestedByDisplayName);

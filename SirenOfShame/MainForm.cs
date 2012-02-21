@@ -100,6 +100,7 @@ namespace SirenOfShame
                                        ImageIndex = buildStatusListViewItem.ImageIndex
                                    };
 
+            AddSubItem(listViewItem, "ID", buildStatusListViewItem.BuildId);
             AddSubItem(listViewItem, "StartTime", buildStatusListViewItem.StartTime);
             AddSubItem(listViewItem, "Duration", buildStatusListViewItem.Duration);
             AddSubItem(listViewItem, "RequestedBy", buildStatusListViewItem.RequestedByDisplayName);

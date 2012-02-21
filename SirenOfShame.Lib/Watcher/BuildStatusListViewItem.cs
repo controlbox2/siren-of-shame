@@ -1,4 +1,5 @@
-﻿using SirenOfShame.Lib.Settings;
+﻿using System;
+using SirenOfShame.Lib.Settings;
 
 namespace SirenOfShame.Lib.Watcher
 {
@@ -14,7 +15,7 @@ namespace SirenOfShame.Lib.Watcher
         public string Id { get; set; }
         public string Name { get; set; }
         public string Url { get; set; }
-        public int BuildId { get; set; }
+        public string BuildId { get; set; }
 
         public void SetDisplayName(SirenOfShameSettings settings)
         {
