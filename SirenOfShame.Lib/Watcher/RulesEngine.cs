@@ -33,6 +33,13 @@ namespace SirenOfShame.Lib.Watcher
         public event SetTrayIconEvent SetTrayIcon;
         public event NewAlertEvent NewAlert;
         public event PlayWindowsAudioEvent PlayWindowsAudio;
+        public event NewAchievementEvent NewAchievement;
+
+        public void InvokeNewAchievement(PersonSetting person, List<AchievementLookup> achievements)
+        {
+            var newAchievement = NewAchievement;
+            if (newAchievement != null) newAchievement(this, new NewAchievementEventArgs { Person = person, Achievements = achievements });
+        }
 
         public void InvokePlayWindowsAudio(string location)
         {
@@ -116,7 +123,7 @@ namespace SirenOfShame.Lib.Watcher
 
             GetAlertAsyncIfNewDay();
 
-            var newBuildStatus = BuildStatusUtil.Merge(_buildStatus, args.BuildStatuses);
+            BuildStatus[] newBuildStatus = BuildStatusUtil.Merge(_buildStatus, args.BuildStatuses);
             var oldBuildStatus = _buildStatus;
             _buildStatus = newBuildStatus;
 
@@ -218,7 +225,7 @@ namespace SirenOfShame.Lib.Watcher
             }
         }
 
-        private void BuildWatcherStatusChanged(IEnumerable<BuildStatus> allBuildStatuses, IEnumerable<BuildStatus> changedBuildStatuses)
+        private void BuildWatcherStatusChanged(BuildStatus[] allBuildStatuses, IList<BuildStatus> changedBuildStatuses)
         {
             Debug.Assert(changedBuildStatuses != null, "changedBuildStatuses should not be null");
             Debug.Assert(PreviousWorkingOrBrokenBuildStatus != null, "PreviousWorkingOrBrokenBuildStatus should never be null");
@@ -253,8 +260,34 @@ namespace SirenOfShame.Lib.Watcher
 
             if (changedBuildStatuses.Any(i => i.IsWorkingOrBroken()))
             {
+                NotifyIfNewAchievements(changedBuildStatuses);
                 InvokeStatsChanged();
             }
+        }
+
+        private void NotifyIfNewAchievements(IEnumerable<BuildStatus> changedBuildStatuses)
+        {
+            var visiblePeopleWithNewChanges = from changedBuildStatus in changedBuildStatuses
+                                             join person in _settings.VisiblePeople on changedBuildStatus.RequestedBy equals person.RawName
+                                             where changedBuildStatus.IsWorkingOrBroken()
+                                             select new
+                                             {
+                                                 Person = person,
+                                                 Build = changedBuildStatus
+                                             };
+            
+            foreach (var personWithNewChange in visiblePeopleWithNewChanges)
+            {
+                var newAchievements = personWithNewChange.Person.CalculateNewAchievements(_settings, personWithNewChange.Build);
+                List<AchievementLookup> achievements = newAchievements.ToList();
+                if (achievements.Any())
+                {
+                    personWithNewChange.Person.AddAchievements(achievements);
+                    InvokeNewAchievement(personWithNewChange.Person, achievements);
+                }
+            }
+            // this is required because achievements often write to settings e.g. cumulative build time
+            _settings.Save();
         }
 
         private static BuildStatusEnum? TryGetBuildStatus(BuildStatus changedBuildStatus, IDictionary<string, BuildStatus> dictionary)
