@@ -108,6 +108,12 @@ namespace SirenOfShame.Lib.Watcher
             return string.Format("{0}:{1:00}", (int)duration.Value.TotalMinutes, duration.Value.Seconds);
         }
 
+        public TimeSpan? GetDuration()
+        {
+            if (FinishedTime == null || StartedTime == null) return null;
+            return FinishedTime.Value - StartedTime.Value;
+        }
+
         private TimeSpan? GetDuration(DateTime? startedTime, DateTime? finishedTime, BuildStatus previousStatus, DateTime now)
         {
             if (BuildStatusEnum != BuildStatusEnum.InProgress)
@@ -153,6 +159,19 @@ namespace SirenOfShame.Lib.Watcher
         public bool IsNewlyFixed(BuildStatusEnum? previousStatus)
         {
             return BuildStatusEnum == BuildStatusEnum.Working && previousStatus != null && previousStatus == BuildStatusEnum.Broken;
+        }
+
+        public bool IsBackToBackWithNextBuild(BuildStatus nextBuild)
+        {
+            const int defaultSecondsForBackToBack = 10;
+            return IsBackToBackWithNextBuild(nextBuild, defaultSecondsForBackToBack);
+        }
+
+        public bool IsBackToBackWithNextBuild(BuildStatus nextBuild, int seconds)
+        {
+            if (nextBuild.StartedTime == null || FinishedTime == null) return false;
+            double secondsBetweenBuilds = (nextBuild.StartedTime.Value - FinishedTime.Value).TotalSeconds;
+            return secondsBetweenBuilds > 0 && secondsBetweenBuilds < seconds;
         }
     }
 }
