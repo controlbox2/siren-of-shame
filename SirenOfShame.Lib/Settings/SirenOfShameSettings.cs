@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 using SirenOfShame.Lib.Device;
 using SirenOfShame.Lib.Watcher;
@@ -34,9 +36,12 @@ namespace SirenOfShame.Lib.Settings
             Save();
         }
 
-        public SirenOfShameSettings()
+        public SirenOfShameSettings() : this(true) { }
+        
+        public SirenOfShameSettings(bool useMef)
         {
-            IocContainer.Instance.Compose(this);
+            if (useMef)
+                IocContainer.Instance.Compose(this);
             Rules = new List<Rule>();
             CiEntryPointSettings = new List<CiEntryPointSetting>();
             AudioPatterns = new List<AudioPatternSetting>();
@@ -65,6 +70,10 @@ namespace SirenOfShame.Lib.Settings
         public int? SortColumn { get; set; }
         
         public bool SortDescending { get; set; }
+
+        public string SosOnlineUsername { get; set; }
+        
+        public string SosOnlinePassword { get; set; }
 
         public string UpdateLocationOther
         {
@@ -118,6 +127,11 @@ namespace SirenOfShame.Lib.Settings
 
         public string FileName { get { return _fileName; } }
 
+        public string MyRawName { get; set; }
+
+        [XmlIgnore]
+        public bool TryToFindOldAchievementsAtNextOpportunity { get; set; }
+
         public virtual void Save()
         {
             string fileName = GetConfigFileName();
@@ -125,7 +139,9 @@ namespace SirenOfShame.Lib.Settings
         }
 
         private object _lock = new object();
-        
+
+        public AchievementAlertPreferenceEnum AchievementAlertPreference { get; set; }
+
         public virtual void Save(string fileName)
         {
             lock (_lock)
@@ -161,9 +177,7 @@ namespace SirenOfShame.Lib.Settings
         public static SirenOfShameSettings GetAppSettings()
         {
             string fileName = GetConfigFileName();
-            var settings = GetAppSettings(fileName);
-            settings.TryUpgrade();
-            return settings;
+            return GetAppSettings(fileName);
         }
 
         public static SirenOfShameSettings GetAppSettings(string fileName)
@@ -185,9 +199,12 @@ namespace SirenOfShame.Lib.Settings
             catch (Exception ex)
             {
                 _log.Error("Unable to deserialize settings file, so reverting", ex);
-                ExceptionMessageBox.Show(null, "Drat",
-                                         "Hate to tell you this, but there was an error deserializing the settings file so we took the liberty of reverting the settings to the factory defaults to get everything up and running.  Sorry about your luck.",
-                                         ex);
+                var dialogResult = MessageBox.Show("There was an error deserializing the settings file.  Click OK to revert the file and start over or cancel to fix the problem yourself (we'll start the app so you can view logs, etc, just close the app quickly and your old settings will remain).  Here's the error: " + ex, "Drat!", MessageBoxButtons.OKCancel);
+                if (dialogResult == DialogResult.Cancel)
+                {
+                    Application.Exit();
+                    return null;
+                }
             }
             finally
             {
@@ -202,13 +219,14 @@ namespace SirenOfShame.Lib.Settings
             return defaultSettings;
         }
 
-        protected void TryUpgrade()
+        public void TryUpgrade()
         {
             var upgrades = new UpgradeBase[]
                                {
                                    new Upgrade0To1(),
                                    new Upgrade1To2(),
                                    new Upgrade2To3(),
+                                   new Upgrade3To4(),
                                };
             var sortedUpgrades = upgrades.OrderBy(i => i.ToVersion);
 
@@ -316,12 +334,33 @@ namespace SirenOfShame.Lib.Settings
 
         public bool BuildExistsAndIsActive(string ciEntryPointName, string buildName)
         {
-            var hudsonCiEntryPoint = CiEntryPointSettings.FirstOrDefault(i => i.Name == ciEntryPointName);
-            if (hudsonCiEntryPoint != null)
+            var ciEntryPoint = CiEntryPointSettings.FirstOrDefault(i => i.Name == ciEntryPointName);
+            if (ciEntryPoint != null)
             {
-                return hudsonCiEntryPoint.BuildDefinitionSettings.Any(i => i.Name == buildName && i.Active);
+                return ciEntryPoint.BuildDefinitionSettings.Any(i => i.Name == buildName && i.Active);
             }
             return false;
+        }
+
+        public bool IsMeOrDefault(PersonSetting person, bool defaultValue)
+        {
+            if (string.IsNullOrEmpty(MyRawName)) return defaultValue;
+            return person.RawName == MyRawName;
+        }
+
+        public IEnumerable<BuildDefinitionSetting> GetAllActiveBuildDefinitions()
+        {
+            return CiEntryPointSettings.SelectMany(i => i.BuildDefinitionSettings).Where(i => i.Active);
+        }
+
+        public void SetSosOnlinePassword(string rawPassword)
+        {
+            SosOnlinePassword = new TripleDESStringEncryptor().EncryptString(rawPassword);
+        }
+
+        public string GetSosOnlinePassword()
+        {
+            return new TripleDESStringEncryptor().DecryptString(SosOnlinePassword);
         }
     }
 }

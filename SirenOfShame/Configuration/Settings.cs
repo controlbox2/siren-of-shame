@@ -1,4 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Net;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using SirenOfShame.Lib.Settings;
 
 namespace SirenOfShame.Configuration
@@ -6,23 +12,85 @@ namespace SirenOfShame.Configuration
     public partial class Settings : FormBase
     {
         private readonly SirenOfShameSettings _settings;
-        private bool _resetReputationOnSave = false;
 
         public Settings(SirenOfShameSettings settings)
         {
             _settings = settings;
             InitializeComponent();
 
+            InitializePollIntervalSection();
+            InitializeUpdateLocationSection();
+            InitializeReputationAndAchievementSection();
+            InitializeSosOnlineSection();
+
+            _viewLog.Enabled = Program.Form.CanViewLogs;
+        }
+
+        private void InitializeSosOnlineSection()
+        {
+            _sosOnlineLogin.Text = _settings.SosOnlineUsername;
+            _sosOnlinePassword.Text = _settings.GetSosOnlinePassword();
+            // todo: set sos online status correctly
+            _sosOnlineStatus.Text = "Have never synced";
+        }
+
+        private void InitializeReputationAndAchievementSection()
+        {
+            _hideReputation.Checked = _settings.HideReputation;
+            InitializeAchievementAlertPreferences();
+            InitializeUserIAm();
+        }
+
+        private void InitializePollIntervalSection()
+        {
             _pollInterval.Value = _settings.PollInterval;
             RefreshDurationText();
+        }
 
+        private void InitializeUpdateLocationSection()
+        {
             _updateLocationAuto.Checked = _settings.UpdateLocation == UpdateLocation.Auto;
             _updateLocationOther.Checked = _settings.UpdateLocation == UpdateLocation.Other;
             _updateLocationNever.Checked = _settings.UpdateLocation == UpdateLocation.Never;
-            _updateLocationOtherLocation.Text = _settings.UpdateLocation == UpdateLocation.Other ? _settings.UpdateLocationOther : "";
-            _hideReputation.Checked = _settings.HideReputation;
+            _updateLocationOtherLocation.Text = _settings.UpdateLocation == UpdateLocation.Other
+                                                    ? _settings.UpdateLocationOther
+                                                    : "";
+        }
 
-            _viewLog.Enabled = Program.Form.CanViewLogs;
+        private void InitializeUserIAm()
+        {
+            _userIAm.Items.Add("");
+            foreach (var personInProject in _settings.People)
+            {
+                _userIAm.Items.Add(personInProject);
+            }
+            if (!string.IsNullOrEmpty(_settings.MyRawName))
+            {
+                foreach (var item in _userIAm.Items)
+                {
+                    var personSetting = item as PersonSetting;
+                    if (personSetting != null && personSetting.RawName == _settings.MyRawName)
+                    {
+                        _userIAm.SelectedItem = item;
+                    }
+                }
+            }
+        }
+
+        private void InitializeAchievementAlertPreferences()
+        {
+            if (_settings.AchievementAlertPreference == AchievementAlertPreferenceEnum.Always)
+            {
+                _alwaysShowNewAchievements.Checked = true;
+            }
+            if (_settings.AchievementAlertPreference == AchievementAlertPreferenceEnum.Never)
+            {
+                _neverShowAchievements.Checked = true;
+            }
+            if (_settings.AchievementAlertPreference == AchievementAlertPreferenceEnum.OnlyForMe)
+            {
+                _onlyShowMyAchievements.Checked = true;
+            }
         }
 
         private UpdateLocation GetUpdateLocation()
@@ -39,7 +107,7 @@ namespace SirenOfShame.Configuration
             {
                 return UpdateLocation.Never;
             }
-            throw new NotImplementedException("One of the update locations needs to be checked");
+            throw new Exception("One of the update locations needs to be checked");
         }
 
         private void OkClick(object sender, EventArgs e)
@@ -50,19 +118,35 @@ namespace SirenOfShame.Configuration
             _settings.UpdateLocationOther = _updateLocationOtherLocation.Text;
             _settings.UpdateLocation = updateLocation;
 
-            if (_resetReputationOnSave)
-            {
-                _settings.People.ForEach(p =>
-                {
-                    p.TotalBuilds = 0;
-                    p.FailedBuilds = 0;
-                });
-            }
-
             _settings.HideReputation = _hideReputation.Checked;
+
+            SetShowAchievements();
+            SetUserIAm();
 
             _settings.Save();
             Close();
+        }
+
+        private void SetUserIAm()
+        {
+            string myRawName = _userIAm.SelectedItem as string == "" ? null : ((PersonSetting) _userIAm.SelectedItem).RawName;
+            _settings.MyRawName = myRawName;
+        }
+
+        private void SetShowAchievements()
+        {
+            if (_alwaysShowNewAchievements.Checked)
+            {
+                _settings.AchievementAlertPreference = AchievementAlertPreferenceEnum.Always;
+            }
+            if (_neverShowAchievements.Checked)
+            {
+                _settings.AchievementAlertPreference = AchievementAlertPreferenceEnum.Never;
+            }
+            if (_onlyShowMyAchievements.Checked)
+            {
+                _settings.AchievementAlertPreference = AchievementAlertPreferenceEnum.OnlyForMe;
+            }
         }
 
         private void CancelClick(object sender, EventArgs e)
@@ -100,9 +184,57 @@ namespace SirenOfShame.Configuration
             Program.Form.CheckForUpdates();
         }
 
-        private void ResetReputationClick(object sender, EventArgs e)
+        private void RecalculateClick(object sender, EventArgs e)
         {
-            _resetReputationOnSave = true;
+            FindOldAchievements.TryFindOldAchievements(_settings);
+        }
+
+        private void CreateAccountLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(SOS_URL + "/Account/Register");
+        }
+
+        private void ViewLeaderboardsLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            // todo: put in correct URL
+            Process.Start(SOS_URL + "/Leaders");
+        }
+
+        private void ResyncClick(object sender, EventArgs e)
+        {
+            
+        }
+
+        private const string SOS_URL = "http://localhost:3115";
+        const string AUTHENTICATION_SUCCESS = "success";
+        
+        private void VerifyCredentialsClick(object sender, EventArgs e)
+        {
+            WebClient webClient = new WebClient();
+            webClient.UploadValuesCompleted += (s, uploadEventArgs) =>
+            {
+                // todo: error handeling when authenticating + abstract this into a service
+                byte[] result = uploadEventArgs.Result;
+                string resultAsStr = System.Text.Encoding.UTF8.GetString(result, 0, result.Length);
+                if (resultAsStr == AUTHENTICATION_SUCCESS)
+                {
+                    _resync.Enabled = true;
+                    _settings.SosOnlineUsername = _sosOnlineLogin.Text;
+                    _settings.SetSosOnlinePassword(_sosOnlinePassword.Text);
+                    _sosOnlineStatus.Text = "Login success";
+                }
+                else
+                {
+                    SosMessageBox.Show("Error connecting", resultAsStr, "Hmmmm");
+                    _sosOnlineStatus.Text = resultAsStr;
+                }
+            };
+
+            NameValueCollection data = new NameValueCollection();
+            data["UserName"] = _sosOnlineLogin.Text;
+            data["Password"] = _sosOnlinePassword.Text;
+            webClient.UploadValuesAsync(new Uri(SOS_URL + "/api/VerifyCredentials"), "POST", data);
+            _sosOnlineStatus.Text = "Logging in ...";
         }
     }
 }
