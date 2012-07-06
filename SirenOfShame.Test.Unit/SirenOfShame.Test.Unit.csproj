@@ -57,6 +57,7 @@
     <Compile Include="Achievements\MacgyverTest.cs" />
     <Compile Include="Achievements\NapoleonTest.cs" />
     <Compile Include="Achievements\ReputationReboundTest.cs" />
+    <Compile Include="Achievements\ShamePusherTest.cs" />
     <Compile Include="CIEntryPointBuildStatus\BambooBuildStatusTest.cs" />
     <Compile Include="CIEntryPointBuildStatus\CruiseControlNetBuildStatusTest.cs" />
     <Compile Include="CIEntryPointBuildStatus\HudsonBuildStatusTest.cs" />
@@ -76,6 +77,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <Compile Include="Service\TeamCityBuildStatusTest.cs" />
+    <Compile Include="Settings\PersonSettingTest.cs" />
     <Compile Include="Settings\SirenOfShameSettingsTest.cs" />
     <Compile Include="Settings\TripleDESStringEncryptorTest.cs" />
     <Compile Include="Settings\Upgrades\Upgrade2To3Test.cs" />

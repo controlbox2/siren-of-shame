@@ -76,6 +76,10 @@ namespace SirenOfShame.Lib.Settings
 
         public long? SosOnlineHighWaterMark { get; set; }
 
+        public bool SosOnlineAlwaysOffline { get; set; }
+
+        public bool SosOnlineAlwaysSync { get; set; }
+
         public string UpdateLocationOther
         {
             get { return _updateLocationOther; }
@@ -366,6 +370,7 @@ namespace SirenOfShame.Lib.Settings
 
         public string ExportNewAchievements()
         {
+            if (string.IsNullOrEmpty(MyRawName)) return null;
             DateTime? highWaterMark = GetHighWaterMark();
             var initialExport = highWaterMark == null;
             var currentUser = GetCurrentUser();
@@ -385,6 +390,26 @@ namespace SirenOfShame.Lib.Settings
         public DateTime? GetHighWaterMark()
         {
             return SosOnlineHighWaterMark == null ? (DateTime?)null : new DateTime(SosOnlineHighWaterMark.Value);
+        }
+
+        public void InitializeUserIAm(ComboBox userIAm)
+        {
+            userIAm.Items.Add("");
+            foreach (var personInProject in People)
+            {
+                userIAm.Items.Add(personInProject);
+            }
+            if (!string.IsNullOrEmpty(MyRawName))
+            {
+                foreach (var item in userIAm.Items)
+                {
+                    var personSetting = item as PersonSetting;
+                    if (personSetting != null && personSetting.RawName == MyRawName)
+                    {
+                        userIAm.SelectedItem = item;
+                    }
+                }
+            }
         }
     }
 }

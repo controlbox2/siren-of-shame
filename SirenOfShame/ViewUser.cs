@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
+using SirenOfShame.Lib.Services;
 using SirenOfShame.Lib.Settings;
 
 namespace SirenOfShame
@@ -27,7 +29,7 @@ namespace SirenOfShame
 
         public void SetUser(PersonSetting personSetting)
         {
-            _userName.Text = personSetting.DisplayName;
+            _userName.Text = personSetting.GetBothDisplayAndRawNames();
             flowLayoutPanel1.Controls.Clear();
 
             foreach (var achievementLookup in AchievementSetting.AchievementLookups)
@@ -45,6 +47,11 @@ namespace SirenOfShame
                 flowLayoutPanel1.Controls.Add(label);
                 toolTip1.SetToolTip(label, achievementLookup.Description);
             }
+        }
+
+        private void _viewAllAchievements_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start(SosOnlineService.SOS_URL + "/Achievements");
         }
     }
 

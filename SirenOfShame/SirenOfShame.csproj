@@ -85,6 +85,12 @@
     <Compile Include="Configuration\AddRule.Designer.cs">
       <DependentUpon>AddRule.cs</DependentUpon>
     </Compile>
+    <Compile Include="Configuration\SyncOnline.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Configuration\SyncOnline.Designer.cs">
+      <DependentUpon>SyncOnline.cs</DependentUpon>
+    </Compile>
     <Compile Include="Configuration\ConfigureRules.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -108,6 +114,12 @@
     </Compile>
     <Compile Include="Configuration\ConfigureSosOnline.Designer.cs">
       <DependentUpon>ConfigureSosOnline.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Configuration\SyncOffline.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Configuration\SyncOffline.Designer.cs">
+      <DependentUpon>SyncOffline.cs</DependentUpon>
     </Compile>
     <Compile Include="Configuration\Settings.cs">
       <SubType>Form</SubType>
@@ -207,14 +219,23 @@
       <DependentUpon>AddRule.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Configuration\SyncOnline.resx">
+      <DependentUpon>SyncOnline.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Configuration\ConfigureRules.resx">
       <DependentUpon>ConfigureRules.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Configuration\ConfigureServers.resx">
       <DependentUpon>ConfigureServers.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Configuration\ConfigureSosOnline.resx">
+      <DependentUpon>ConfigureSosOnline.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Configuration\FindOldAchievements.resx">
       <DependentUpon>FindOldAchievements.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Configuration\SyncOffline.resx">
+      <DependentUpon>SyncOffline.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Configuration\Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
@@ -316,8 +337,10 @@
     <Content Include="Resources\Audio-DaDing.wav" />
     <Content Include="Resources\Audio-Ding.wav" />
     <None Include="Resources\CloseButton2.png" />
+    <None Include="Resources\cloud-title.png" />
     <Content Include="Resources\Fullscreen.png" />
     <EmbeddedResource Include="Resources\Audio-Plunk.wav" />
+    <None Include="Resources\loading.gif" />
     <Content Include="Resources\question_big.png" />
     <Content Include="Resources\RibbonMore.png" />
     <EmbeddedResource Include="Resources\Audio-Sad-Trombone.wav" />
