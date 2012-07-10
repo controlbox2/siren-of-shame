@@ -13,7 +13,7 @@ namespace SirenOfShame.Lib.Services
 
         public void VerifyCredentialsAsync(SirenOfShameSettings settings, Action onSuccess, Action<string, ServerUnavailableException> onFail)
         {
-            WebClientXml webClientXml = new WebClientXml();
+            WebClientXml webClientXml = new WebClientXml { AutodetectProxy = true };
             AddSosOnlineCredentials(settings, webClientXml);
             webClientXml.UploadValuesAndReturnXmlAsync(SOS_URL + "/ApiV1/VerifyCredentials", doc =>
             {
