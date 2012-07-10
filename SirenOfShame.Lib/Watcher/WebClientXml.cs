@@ -12,6 +12,11 @@ namespace SirenOfShame.Lib.Watcher
 {
     public class WebClientXml
     {
+        public WebClientXml()
+        {
+            AutodetectProxy = false;
+        }
+        
         private static readonly ILog _log = MyLogManager.GetLogger(typeof(WebClientXml));
         private NameValueCollection _data = new NameValueCollection();
         
@@ -22,6 +27,8 @@ namespace SirenOfShame.Lib.Watcher
                 "Please wait while Jenkins is getting ready to work",
                 "The remote server returned an error: (503) Server Unavailable",
             };
+
+        public bool AutodetectProxy { get; set; }
 
         protected virtual bool IsServerUnavailable(string errorResult)
         {
@@ -36,6 +43,10 @@ namespace SirenOfShame.Lib.Watcher
                 CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore),
             };
 
+            var proxy = GetWebProxy();
+            if (proxy != null)
+                webClient.Proxy = proxy;
+            
             if (cookie != null)
                 webClient.Headers.Add("Cookie", cookie);
 
@@ -47,6 +58,24 @@ namespace SirenOfShame.Lib.Watcher
             {
                 throw ToServerUnavailableException(url, webException);
             }
+        }
+
+        private WebProxy GetWebProxy()
+        {
+            if (!AutodetectProxy) return null;
+            WebProxy proxy = WebRequest.DefaultWebProxy as WebProxy;
+            if (proxy == null)
+            {
+                _log.Error("Unable to autodetect proxy, WebRequest.DefaultWebProxy = " + WebRequest.DefaultWebProxy.GetType().Name);
+                return null;
+            }
+            
+            if (proxy.Address.AbsoluteUri != string.Empty)
+            {
+                _log.Debug("Proxy URL: " + proxy.Address.AbsoluteUri);
+                return proxy;
+            }
+            return null;
         }
 
         private static XDocument TryParseXmlResult(string url, string resultString)
