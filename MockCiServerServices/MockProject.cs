@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Forms;
 using SirenOfShame.Lib.Helpers;
 using SirenOfShame.Lib.Watcher;
@@ -16,6 +17,10 @@ namespace MockCiServerServices
         {
             InitializeComponent();
             _status.SelectedIndex = 1;
+            _localStartTime = DateTime.Now.AddMinutes(-8).AddSeconds(-4);
+            _startedTime = DateTime.Now.AddMinutes(-8).AddSeconds(-4);
+            _finishedTime = DateTime.Now;
+            UpdateDateTimeTextboxes();
         }
 
         public string ProjectName
@@ -41,7 +46,9 @@ namespace MockCiServerServices
                         FinishedTime = _finishedTime,
                         StartedTime = _startedTime,
                         RequestedBy = _requestedBy.Text,
-                        LocalStartTime = _localStartTime
+                        LocalStartTime = _localStartTime,
+                        BuildId = _startedTime.HasValue ? _startedTime.Value.Ticks.ToString(CultureInfo.InvariantCulture) : null,
+                        Url = "http://www.google.com"
                     };
                 });
             return buildStatus;
@@ -64,6 +71,11 @@ namespace MockCiServerServices
 
             _buildStatus = newBuildStatus;
 
+            UpdateDateTimeTextboxes();
+        }
+
+        private void UpdateDateTimeTextboxes()
+        {
             _startTime.Text = _startedTime.ToString();
             _finishTime.Text = _finishedTime.ToString();
         }
