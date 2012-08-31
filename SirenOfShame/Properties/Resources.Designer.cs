@@ -67,6 +67,13 @@ namespace SirenOfShame.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap AchievementBall {
+            get {
+                object obj = ResourceManager.GetObject("AchievementBall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap ball_gray_big {
             get {
                 object obj = ResourceManager.GetObject("ball_gray_big", resourceCulture);
@@ -116,6 +123,34 @@ namespace SirenOfShame.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap gear {
+            get {
+                object obj = ResourceManager.GetObject("gear", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap gear_white {
+            get {
+                object obj = ResourceManager.GetObject("gear_white", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap gradient15 {
+            get {
+                object obj = ResourceManager.GetObject("gradient15", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap gradient33 {
+            get {
+                object obj = ResourceManager.GetObject("gradient33", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap JoesFavorite3 {
             get {
                 object obj = ResourceManager.GetObject("JoesFavorite3", resourceCulture);
@@ -126,6 +161,41 @@ namespace SirenOfShame.Properties {
         internal static System.Drawing.Bitmap loading {
             get {
                 object obj = ResourceManager.GetObject("loading", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap MainBackground {
+            get {
+                object obj = ResourceManager.GetObject("MainBackground", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap nav_left {
+            get {
+                object obj = ResourceManager.GetObject("nav_left", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap nav_up_right {
+            get {
+                object obj = ResourceManager.GetObject("nav_up_right", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap navigate_down2 {
+            get {
+                object obj = ResourceManager.GetObject("navigate_down2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap navigate_up {
+            get {
+                object obj = ResourceManager.GetObject("navigate_up", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -189,6 +259,13 @@ namespace SirenOfShame.Properties {
         internal static System.Drawing.Bitmap splash {
             get {
                 object obj = ResourceManager.GetObject("splash", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap TrashSmall {
+            get {
+                object obj = ResourceManager.GetObject("TrashSmall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
