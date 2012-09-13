@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
 using System.Linq;
@@ -14,18 +13,18 @@ namespace SirenOfShame
     public partial class NewsFeed : UserControlBase
     {
         public event UserClicked OnUserClicked;
-        public event ViewAllNewsDelegate OnViewAllNews;
-
-        private void InvokeOnViewAllNews()
-        {
-            ViewAllNewsDelegate handler = OnViewAllNews;
-            if (handler != null) handler(this, new ViewAllNewsArgs());
-        }
+        public event SendMessageToSosOnline OnSendMessageToSosOnline;
 
         private void InvokeOnOnUserClicked(UserClickedArgs args)
         {
             UserClicked handler = OnUserClicked;
             if (handler != null) handler(this, args);
+        }
+
+        private void InvokeSendMessageToSosOnline(string message)
+        {
+            SendMessageToSosOnline handler = OnSendMessageToSosOnline;
+            if (handler != null) handler(this, new SendMessageToSosOnlineArgs { Message = message});
         }
 
         public void ChangeUserAvatarId(string rawUserName, int newImageIndex)
@@ -286,19 +285,33 @@ namespace SirenOfShame
             }
         }
 
-        private void Label1MouseEnter(object sender, EventArgs e)
+        private void MessageKeyDown(object sender, KeyEventArgs e)
         {
-            label1.ForeColor = Color.FromArgb(196, 65, 0);
+            if (e.KeyCode == Keys.Return)
+            {
+                SubmitMessage();
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
         }
 
-        private void Label1MouseLeave(object sender, EventArgs e)
+        private void SubmitMessage()
         {
-            label1.ForeColor = Color.White;
+            if (!string.IsNullOrEmpty(_message.Text))
+                InvokeSendMessageToSosOnline(_message.Text);
+            _message.Text = "";
         }
 
-        private void Label1Click(object sender, EventArgs e)
+        private void AddMessageClick(object sender, EventArgs e)
         {
-            InvokeOnViewAllNews();
+            SubmitMessage();
         }
+    }
+
+    public delegate void SendMessageToSosOnline(object sender, SendMessageToSosOnlineArgs args);
+
+    public class SendMessageToSosOnlineArgs
+    {
+        public string Message { get; set; }
     }
 }
